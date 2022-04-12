@@ -1,0 +1,161 @@
+= AsciiDoc Example Slides: Lecture 01
+Vsevolod Minkov
+:revealjs_theme: black
+:revealjs_customtheme: css/white_course.css
+:revealjs_slideNumber:
+:revealjs_history:
+:revealjs_progress:
+:encoding: UTF-8
+:lang: ru
+:doctype: article
+:toclevels: 3
+:imagesdir: images
+:source-highlighter: highlightjs
+:highlightjsdir: highlight
+:icons: font
+:iconfont-remote!:
+:iconfont-name: font-awesome-4.7.0/css/font-awesome
+:revealjs_mouseWheel: true
+:revealjs_center: false
+:revealjs_transition: none
+:revealjs_width: 1600
+:revealjs_height: 900
+:stem: latexmath
+
+:!figure-caption:
+
+icon:telegram[size=lg] link:http://t.me/vsminkov[@vsminkov]
+
+== Введение
+
+[cols="80a,20a"]
+|===
+.^|
+Мультипарадигменный статически и сильно типизированный кросплатформенный язык программирования общего назначения
+
+* 1991 -- начало разработки (Gosling, Sheridan, Naughton) Sun Microsystems
+* 1995 -- первая версия
+* 2007 -- OpenJDK
+* 2010 -- Oracle поглотил Sun
+* 2017 -- переход на release train
+* 2022 -- Java 17 (LTS)
+.^|
+image::java-logo.svg[{image-100-width}]
+|===
+
+== Hello, world!
+
+[source,java]
+----
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello World!");
+    }
+}
+----
+
+== Целочисленные типы
+
+[cols="10a,10a,10a,70a"]
+|===
+| *Тип*      | *Размер* | *Box*       | *MIN_VALUE, MAX_VALUE*
+| `*byte*`   | 1 byte   | `Byte`      | stem:[-2^7 = -128, 2^7-1 = 127]
+| `*short*`  | 2 bytes  | `Short`     | stem:[-2^{15} = –32 768, 2^{15}-1 = 32 767]
+| (`*char*`) | 2 bytes  | `Character` | stem:[0, 2^{16}-1 = 65 536]
+| `*int*`    | 4 bytes  | `Integer`   | stem:[-2^{31} = –2 147 483 648, 2^{31}-1 = 2 147 483 647]
+| `*long*`   | 8 bytes  | `Long`      | stem:[-2^{63} ≈ -9\cdot{10^{18}}, 2^{63}-1 ≈ 9\cdot{10^{18}}]
+|===
+
+== Сжимающее преобразования примитивных типов (narrowing)
+
+[graphviz, "narrowing.png"]
+-----
+digraph G {
+ graph [ dpi = 200 ];
+ rankdir="LR";
+  double -> float [style=dashed];
+  float -> long [style=dashed];
+  long -> int [style=dashed];
+  int -> short [style=dashed];
+  int -> char [style=dashed];
+  short -> byte [style=dashed];
+  short -> char [style=dashed];
+  char -> short [style=dashed];
+  char -> byte [style=dashed];
+}
+-----
+
+* Сужающее преобразование должно задаваться явно через приведение типа
+* Потеря точности происходит всегда, правила преобразования не всегда интуитивны
+* Для контроля над потерей точности нужно использовать методы из `Math` либо `BigDecimal`, `BigInteger`
+
+== Модель памяти
+
+* Модель памяти (Java Memory Model, JMM, JLS §17.4) -- спецификация языка и виртуальной машины, отвечающая на вопрос:
+«какую запись и при каких условиях получит конкретная операция чтения»
+* JMM -- слабая модель, определяет частичный порядок на всех операциях в java-программе, называемый _happens-before_,
+обладающий свойствами:
+** рефлексивности -- stem:[\forall x : x \prec x]
+** транзитивности -- stem:[(x \prec y) \wedge (y \prec z) \Rightarrow x \prec z]
+** антисимметричности -- stem:[\forall x, y: (x \prec y) \wedge (y \prec x) \implies x = y]
+* Чтобы действие y гарантированно видело результат работы действия x, достаточно, чтобы stem:[x \prec y].
+
+
+== Надтипы и подтипы
+
+[plantuml, wildcards, png]
+----
+@startuml
+
+skinparam dpi 150
+skinparam genericDisplay old
+
+"Box<?>" <|-- "Box<? super Number>"
+
+"Box<?>" <|-- "Box<? extends Number>"
+
+"Box<? super Number>" <|-- "Box<Object>"
+"Box<? super Number>" <|-- "Box<Number>"
+
+"Box<? extends Number>" <|-- "Box<Double>"
+"Box<? extends Number>" <|-- "Box<Integer>"
+"Box<? extends Number>" <|-- "NumberBox<?>"
+
+"Box<Double>" <|-- "NumberBox<Double>"
+
+"Box<Integer>" <|-- "NumberBox<Integer>"
+
+"NumberBox<?>" <|-- "NumberBox<Integer>"
+"NumberBox<?>" <|-- "NumberBox<Double>"
+
+"NumberBox<Integer>" <|-- IntegerBox
+
+hide members
+hide circle
+
+@enduml
+----
+
+
+
+== Где взять
+
+JDK: Google «jdk download»
+
+* OpenJDK early access builds -- http://jdk.java.net/17/
+* Oracle Java SE JDK -- https://www.oracle.com/java/technologies/javase-downloads.html
+* https://adoptopenjdk.net/releases.html
+* Amazon Corretto -- https://docs.aws.amazon.com/en_us/corretto/latest/corretto-8-ug/downloads-list.html
+
+[.fragment]
+----
+$ sudo apt-get install openjdk-17-jdk
+----
+
+[.fragment]
+----
+$ git clone https://github.com/openjdk/jdk OpenJDK
+$ cd OpenJDK
+$ bash ./configure
+$ make all
+----
