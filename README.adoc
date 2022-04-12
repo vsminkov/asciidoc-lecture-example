@@ -1,0 +1,6 @@
+= AsciiDoc Example Slides
+
+* `mvn clean package`
+* `xdg-open lecture-01/target/generated-slides/index.html`
+* ???
+* *PROFIT!*
